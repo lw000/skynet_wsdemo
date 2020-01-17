@@ -1,22 +1,13 @@
-local skynet = require "skynet"
 local pb = require("protobuf")
-pb.register_file("./protos/service.pb")
-skynet.error("注册service协议")
 
-local SVR_TYPE = {
+pb.register_file("./protos/service.pb")
+print("注册service.pb协议")
+
+SVR_TYPE = {
     ServerType = 6 -- 服务类型
 }
 
-local proto_map = {
-    [0x0001] = {
-        name = "MDM_CORE", -- 注册服务主命令
-        [0x0001] = {name = "SUB_CORE_REGISTER", req = "Tapi.ReqRegService", ack = "Tapi.AckRegService", dest = "注册服务器"},
-        [0x0002] = {name = "SUB_CORE_SVRCONNED", req = "", ack = "Tapi.ReqServerConned", dest = "服务器已连接"},
-        [0x0003] = {name = "SUB_CORE_SVRCLOSED", req = "", ack = "Tapi.ReqServerClosed", dest = "服务器已关闭"}
-    }
-}
-
-local msgswitch = {
+msgswitch = {
     [0x0000] = {
         [0x0000] = {
             name = "心跳消息",
@@ -62,4 +53,4 @@ local msgswitch = {
 
 dump(msgswitch, "msgswitch")
 
-return msgswitch
+-- return msgswitch
