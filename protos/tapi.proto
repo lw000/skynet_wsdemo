@@ -1,0 +1,153 @@
+syntax = "proto2";
+
+package Tapi;
+
+//请求登录
+message ReqLogin {
+	optional string loginAcc = 1;      	//账号
+	optional double addScore = 2;      	//上分金额
+	optional string orderId = 3;      	//交易订单
+	optional uint32 gameId = 4;        	//游戏类型
+	optional string mobile = 5;        	//手机号
+	optional int32 isBind = 6;        	//是否绑定.0-否；1-是
+	optional int32 gender = 7;        	//性别
+	optional string nickName = 8;      	//用户昵称
+	optional string faceUrl = 9;      	//头像地址
+	optional int32 canalId = 10;      	//渠道信息
+	optional int32 deviceType = 11;     //设备类型
+	optional string machineId = 12;     //机器序列
+	optional string clientIp = 13;      //客户端IP
+	optional int32 agentId = 14;      	//代理Id
+	optional int32 authType = 15;      	//授权类型。0-第三方网页；1-微信
+}
+//回应登录
+message AckLogin {
+	optional sint32 result = 1;				//操作结果：0-成功；非0-失败
+	optional string errmsg = 2;				//错误描述
+	optional uint32 code = 3;				//错误码
+	optional double addScore = 4;			//上分金额
+	optional string loginAcc = 5;			//账号
+	optional string token = 6;				//登录token
+	optional uint32 gameId = 7;				//游戏类型
+	optional uint32 userId = 8;				//用户Id
+}
+
+//请求上分
+message ReqUpScore {
+	optional string loginAcc = 1;			//账号
+	optional double addScore = 2;			//上分金额
+	optional string orderId = 3;			//交易订单
+	optional int32 agentId = 4;				//代理Id
+	optional int32 canalId = 5;				//渠道Id
+}
+//回应上分
+message AckUpScore {
+	optional sint32 result = 1;				//操作结果：0-成功；非0-失败
+	optional string errmsg = 2;				//错误描述
+	optional uint32 code = 3; 				//错误码
+	optional string loginAcc = 4;			//账号
+	optional double addScore = 5;			//上分金额
+	optional double score = 6;				//玩家分数
+	optional uint32 userId = 7;				//用户Id
+}
+
+//请求下分
+message ReqDownScore {
+	optional string loginAcc = 1;			//账号
+	optional double takeScore = 2;			//下分金额
+	optional string orderId = 3;			//交易订单
+	optional int32 agentId = 4;				//代理Id
+	optional int32 canalId = 5;				//渠道Id
+}
+//回应下分
+message AckDownScore {
+	optional sint32 result = 1;				//操作结果：0-成功；非0-失败
+	optional string errmsg = 2;				//错误描述
+    optional uint32 code = 3; 				//错误码
+	optional string loginAcc = 4;			//账号
+	optional double takeScore = 5;			//下分金额
+	optional double score = 6;				//可下分数
+	optional uint32 userId = 7;				//用户Id
+}
+
+//请求查询订单
+message ReqQueryOrder {
+	optional string orderId = 1;			//交易订单
+}
+//回应查询订单
+message AckQueryOrder {
+	optional uint32 code = 1;				//错误码
+    optional int32 status = 2;				//状态码(-1不存在，0成功，2失败，3处理中)
+	optional double orderScore = 3;			//订单金额
+}
+
+//请求查询玩家在线状态
+message ReqUserStatus {
+	optional string loginAcc = 1;			//账号
+	optional int32 canalId = 2;				//渠道Id
+}
+//回应查询玩家在线状态
+message AckUserStatus {
+    optional uint32 code = 1;				//错误码
+    optional int32 status = 2; 				//状态码(-1不存在，0不在线，1在线，2封停)
+}
+
+//请求查询玩家总分
+message ReqUserScore {
+	optional string loginAcc = 1;			//账号
+	optional int32 canalId = 2;				//渠道Id
+}
+//回应查询玩家总分
+message AckUserScore {
+	optional uint32 code = 1;				//错误码
+	optional double score = 2;				//玩家分数
+	optional double takeScore = 3;			//玩家可下分数
+	optional int32 status = 4; 				//状态码(-1不存在，0不在线，1在线，2封停)
+}
+
+//请求可下分
+message ReqQueryDownScore {
+	optional string loginAcc = 1;			//账号
+	optional int32 canalId = 2;				//渠道Id
+}
+//回应可下分
+message AckQueryDownScore {
+	optional uint32 code = 1;				//错误码
+	optional double score = 2;				//玩家可下分数
+}
+
+//请求踢玩家下线
+message ReqKickUser {
+	optional string loginAcc = 1;			//账号
+	optional int32 canalId = 2;				//渠道Id
+}
+//回应踢玩家下线
+message AckKickUser {
+	optional uint32 code = 1;				//错误码
+}
+
+//游戏记录
+message GameRecord {
+	optional string loginAcc = 1;			//账号
+	optional string recordId = 2;			//游戏局号
+	optional string gameName = 3;			//游戏名字
+	optional double changeScore = 4;		//输赢
+	optional double revenue = 5;			//税收
+	optional double jettonScore = 6;		//下注数
+	optional string startTime = 7;			//开始时间
+	optional string endTime = 8;			//结束时间
+}
+
+//请求游戏记录
+message ReqGameRecord {
+	optional string loginAcc = 1;			//账号
+	optional int32 agentId = 2;				//代理Id
+	optional int32 canalId = 3;				//渠道Id
+	optional string startTime = 4;			//开始时间
+	optional string endTime = 5;			//结束时间
+}
+//回应游戏记录
+message AckGameRecord {
+	optional uint32 code = 1;				//错误码
+	repeated GameRecord gameRecords = 2;	//游戏记录列表
+}
