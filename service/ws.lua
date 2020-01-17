@@ -38,7 +38,7 @@ function WSClient:connect(scheme, host, path, heartbeattime)
     self._path = path
 
     local url = string.format("%s://%s/%s", self._scheme, self._host, self._path)
-    skynet.error("connect", url)
+    skynet.error("connect to ", url)
 
     self._wsid = self._websocket.connect(url, nil, self._timeout)
     skynet.error(">: self._wsid=" .. self._wsid)
@@ -55,10 +55,10 @@ function WSClient:connect(scheme, host, path, heartbeattime)
                 skynet.sleep(100)
                 local now = os.date("*t")
                 -- dump(now, "当前时间")
-                skynet.error("当前时间", os.date("%Y-%m-%d %H:%M:%S", os.time(now)))
+                -- skynet.error("当前时间", os.date("%Y-%m-%d %H:%M:%S", os.time(now)))
 
                 if math.fmod(now.sec, self._heartbeattime) == 0 then
-                    self:sendBinary(
+                    self:send(
                         0x0000,
                         0x0000,
                         nil,
@@ -66,7 +66,7 @@ function WSClient:connect(scheme, host, path, heartbeattime)
                             print("心跳消息", os.date("%Y-%m-%d %H:%M:%S", os.time()))
                         end
                     )
-                -- self:sendBinary(0x0000, 0x0000, nil)
+                -- self:send(0x0000, 0x0000, nil)
                 end
             end
         end
@@ -81,10 +81,10 @@ end
 
 function WSClient:registerService(mid, sid, serverId, content, fn)
     self._serverId = serverId
-    self:sendBinary(mid, sid, content, fn)
+    self:send(mid, sid, content, fn)
 end
 
-function WSClient:sendBinary(mid, sid, content, fn)
+function WSClient:send(mid, sid, content, fn)
     if not self._open then
         return 0
     end
@@ -125,7 +125,7 @@ end
 
 function WSClient:onMessage(fn)
     self._onMessage = fn or function(conn, pk)
-            skynet.error("<: pk", "mid=" .. pk:mid(), "sid=" .. pk:sid(), "clientId=" .. pk:clientId(), "默认·消息·函数")
+            skynet.error("<: ", "mid=" .. pk:mid(), "sid=" .. pk:sid(), "clientId=" .. pk:clientId(), "默认·消息·函数")
         end
 end
 
@@ -144,7 +144,7 @@ function WSClient:run()
 
     while true do
         local resp, close_reason = self._websocket.read(self._wsid)
-        skynet.error("<: " .. (resp and resp or "[Close] " .. close_reason))
+        skynet.error("<:", (resp and resp or "[Close] " .. close_reason))
         if not resp then
             skynet.error("server close")
             break
@@ -154,7 +154,7 @@ function WSClient:run()
         pk:unpack(resp)
 
         skynet.error(
-            "<: pk",
+            "<:",
             "ver=" .. pk:ver(),
             "mid=" .. pk:mid(),
             "sid=" .. pk:sid(),
