@@ -71,7 +71,7 @@ end
 
 function handle.handshake(id, header, url)
     local addr = websocket.addrinfo(id)
-    print("ws handshake from: " .. tostring(id), "url", url, "addr:", addr)
+    print("ws handshake from: " .. tostring(id), "url=" .. url, "addr=" .. addr)
     print("----header-----")
     for k, v in pairs(header) do
         print(k, v)

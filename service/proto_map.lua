@@ -1,10 +1,16 @@
 local pb = require("protobuf")
 
-proto_map = proto_map or
+proto_map =
+    proto_map or
     {
         [0x0001] = {
             name = "MDM_CORE", -- 注册服务主命令
-            [0x0001] = {name = "SUB_CORE_REGISTER", req = "Tapi.ReqRegService", ack = "Tapi.AckRegService", dest = "注册服务器"},
+            [0x0001] = {
+                name = "SUB_CORE_REGISTER",
+                req = "Tapi.ReqRegService",
+                ack = "Tapi.AckRegService",
+                dest = "注册服务器"
+            },
             [0x0002] = {name = "SUB_CORE_SVRCONNED", req = "", ack = "Tapi.ReqServerConned", dest = "服务器已连接"},
             [0x0003] = {name = "SUB_CORE_SVRCLOSED", req = "", ack = "Tapi.ReqServerClosed", dest = "服务器已关闭"}
         }
