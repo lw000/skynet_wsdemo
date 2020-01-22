@@ -59,8 +59,6 @@ local msgs_switch = {
 }
 
 function CMD.START(scheme, host)
-    skynet.error(scheme, host)
-
     client:connect(scheme, host)
     client:handleMessage(
         function(conn, pk)
@@ -86,7 +84,7 @@ function CMD.START(scheme, host)
 end
 
 function CMD.registerService(serverId, svrType)
-    local content =
+    local reqRegService =
         proto_map.encode_ReqRegService(
         {
             serverId = serverId,
@@ -99,7 +97,7 @@ function CMD.registerService(serverId, svrType)
         0x0001,
         0x0001,
         0,
-        content,
+        reqRegService,
         function(conn, pk)
             local data = proto_map.decode_AckRegService(pk:data())
             dump(data, "AckRegService")
@@ -116,10 +114,6 @@ function dispatcher()
         function(session, address, cmd, ...)
             cmd = cmd:upper()
             if cmd == "START" then
-                local f = CMD[cmd]
-                assert(f)
-                skynet.ret(skynet.pack(f(...)))
-            elseif cmd == "EXECSTAT" then
                 local f = CMD[cmd]
                 assert(f)
                 skynet.ret(skynet.pack(f(...)))

@@ -47,11 +47,7 @@ function WSClient:connect(scheme, host, path, heartbeattime)
 
     skynet.fork(
         function(...)
-            while 1 do
-                if not self._open then
-                    break
-                end
-
+            while self._open do
                 skynet.sleep(100)
                 local now = os.date("*t")
                 -- dump(now, "当前时间")
@@ -63,7 +59,7 @@ function WSClient:connect(scheme, host, path, heartbeattime)
                         0x0000,
                         nil,
                         function(conn, data)
-                            print("心跳消息", os.date("%Y-%m-%d %H:%M:%S", os.time()))
+                            print("心跳", os.date("%Y-%m-%d %H:%M:%S", os.time()))
                         end
                     )
                 -- self:send(0x0000, 0x0000, nil)

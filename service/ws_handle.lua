@@ -16,7 +16,7 @@ local msgs_switch = {
             name = "",
             dest = "心跳",
             fn = function(id, pk)
-                print("心跳消息", os.date("%Y-%m-%d %H:%M:%S", os.time()))
+                print("心跳", os.date("%Y-%m-%d %H:%M:%S", os.time()))
             end
         }
     },

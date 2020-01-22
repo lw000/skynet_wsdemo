@@ -23,7 +23,6 @@ function WSService.send(cmd, ...)
     skynet.send(WSService.service, "lua", cmd, ...)
 end
 
-
 local msgs_switch = {
     [0x0000] = {
         [0x0000] = {
@@ -141,7 +140,7 @@ skynet.start(
         -- local c1 = skynet.newservice("ws_client")
         -- skynet.send(c1, "lua", "start", "ws", "192.168.0.105:9948")
 
-        for i = 0, 0 do
+        for i = 0, 100 do
             skynet.sleep(10)
             skynet.fork(test_ws_client, "ws", "192.168.0.105:9948")
         end

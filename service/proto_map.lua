@@ -4,7 +4,8 @@ proto_map =
     proto_map or
     {
         [0x0001] = {
-            name = "MDM_CORE", -- 注册服务主命令
+            name = "MDM_CORE",
+            dest = "注册服务主命令",
             [0x0001] = {
                 name = "SUB_CORE_REGISTER",
                 req = "Tapi.ReqRegService",
@@ -55,5 +56,3 @@ end
 function proto_map.decode_ReqServerClosed(data)
     return pb.decode("Tapi.ReqServerClosed", data)
 end
-
--- dump(proto_map, "proto_map")
