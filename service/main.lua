@@ -11,16 +11,6 @@ require("export")
 
 -- proto_map.registerFiles("./protos/service.pb")
 
--- local WSService = {}
--- function WSService.call(cmd, ...)
---     local ret = skynet.call(WSService.service, "lua", cmd, ...)
---     skynet.error("ret", ret)
--- end
-
--- function WSService.send(cmd, ...)
---     skynet.send(WSService.service, "lua", cmd, ...)
--- end
-
 -- local msgs_switch = {
 --     [0x0000] = {
 --         [0x0000] = {
@@ -106,6 +96,12 @@ require("export")
 --     )
 -- end
 
+local mydb = -1
+function dump_cache( ... )
+    skynet.timeout(100, dump_cache)
+    skynet.call(mydb, "lua", "dump")
+end
+
 skynet.start(
     function()
         -- local pack_little = string.pack("<I2", 259)
@@ -117,28 +113,31 @@ skynet.start(
         --     "pack_bigger = " .. pack_bigger .. " byte1 = " .. pack_bigger:byte(1) .. " byte2 = " .. pack_bigger:byte(2)
         -- )
 
-        local db = skynet.newservice("mydb")
-        local ret = skynet.call(db, "lua", "start")
+        mydb = skynet.newservice("mydb")
+        local ret = skynet.call(mydb, "lua", "start")
         if ret ~= 0 then
             skynet.error("mydb server init fail")
             return
         end
 
+        skynet.call(mydb, "lua", "set", "start", os.date("%Y-%m-%d %H:%M:%S", os.time()))
+
         local wsserve = skynet.newservice("ws_server")
         local ret, err = skynet.call(wsserve, "lua", "start", 9948)
-        print(ret, err or "success")
-        if ret == 0 then
-            -- WSService.service = skynet.newservice("ws_client")
-            -- WSService.send("start", "ws", "192.168.0.105:9948")
-            -- WSService.send("start", "ws", "47.97.66.156:8850")
-            
-            for i = 0, 1 do
-                skynet.sleep(10)
-                -- skynet.fork(test_ws_client, "ws", "192.168.0.105:9948")
-
-                local c = skynet.newservice("ws_client")
-                skynet.send(c, "lua", "start", "ws", "192.168.0.105:9948")
-            end
+        if ret ~= 0 then
+            skynet.error(ret, err)
         end
+
+        for i = 0, 1 do
+            skynet.sleep(10)
+            -- skynet.fork(test_ws_client, "ws", "192.168.0.105:9948")
+
+            local c = skynet.newservice("ws_client")
+            skynet.send(c, "lua", "start", "ws", "192.168.0.105:9948")
+        end
+
+        skynet.timeout(10, dump_cache)
+
+        skynet.error("Server start")
     end
 )

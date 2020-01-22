@@ -6,8 +6,6 @@ local websocket = require "http.websocket"
 local packet = require("packet")
 require("proto_map")
 
-proto_map.registerFiles("./protos/service.pb")
-
 local handle = {}
 
 local msgs_switch = {
@@ -16,7 +14,7 @@ local msgs_switch = {
             name = "",
             dest = "心跳",
             fn = function(id, pk)
-                print("心跳", os.date("%Y-%m-%d %H:%M:%S", os.time()))
+                skynet.error("心跳", os.date("%Y-%m-%d %H:%M:%S", os.time()))
             end
         }
     },
@@ -66,17 +64,17 @@ local msgs_switch = {
 }
 
 function handle.connect(id)
-    print("ws connect from: " .. tostring(id))
+    skynet.error("ws connect from: " .. tostring(id))
 end
 
 function handle.handshake(id, header, url)
     local addr = websocket.addrinfo(id)
-    print("ws handshake from: " .. tostring(id), "url=" .. url, "addr=" .. addr)
-    print("----header-----")
+    skynet.error("ws handshake from: " .. tostring(id), "url=" .. url, "addr=" .. addr)
+    skynet.error("----header-----")
     for k, v in pairs(header) do
-        print(k, v)
+        skynet.error(k, v)
     end
-    print("--------------")
+    skynet.error("--------------")
 end
 
 function handle.message(id, msg)
@@ -94,46 +92,30 @@ function handle.message(id, msg)
         "dataLen=" .. string.len(pk:data())
     )
 
-    -- if pk:mid() == 0x0001 then
-    --     if pk:sid() == 0x0001 then
-    --         local content =
-    --             proto_map.encode_AckRegService(
-    --             {
-    --                 result = 0,
-    --                 serverId = 10000,
-    --                 errmsg = "客户端注册成功"
-    --             }
-    --         )
-    --         handle.send(id, pk:mid(), pk:sid(), pk:clientId(), content)
-    --     end
-    -- end
-
     local msgmap = msgs_switch[pk:mid()][pk:sid()]
     if msgmap then
         if msgmap.fn ~= nil then
             skynet.fork(msgmap.fn, id, pk)
         end
     else
-        print("<: pk", "mid=" .. pk:mid() .. ", sid=" .. pk:sid() .. "命令未实现")
+        skynet.error("<: pk", "mid=" .. pk:mid() .. ", sid=" .. pk:sid() .. "命令未实现")
     end
-
-    -- websocket.write(id, msg)
 end
 
 function handle.ping(id)
-    print("ws ping from: " .. tostring(id) .. "\n")
+    skynet.error("ws ping from: " .. tostring(id) .. "\n")
 end
 
 function handle.pong(id)
-    print("ws pong from: " .. tostring(id))
+    skynet.error("ws pong from: " .. tostring(id))
 end
 
 function handle.close(id, code, reason)
-    print("ws close from: " .. tostring(id), code, reason)
+    skynet.error("ws close from: " .. tostring(id), code, reason)
 end
 
 function handle.error(id)
-    print("ws error from: " .. tostring(id))
+    skynet.error("ws error from: " .. tostring(id))
 end
 
 function handle.send(wsid, mid, sid, clientid, content)
@@ -152,12 +134,23 @@ skynet.start(
         skynet.dispatch(
             "lua",
             function(session, address, sock_id, protocol, addr)
-                print("accept", "session= " .. session, "address=".. skynet.address(address), "sock_id=" .. sock_id, "protocol=" .. protocol, "addr=" .. addr)
+                skynet.error(
+                    "accept",
+                    "session=" .. session,
+                    "address=" .. skynet.address(address),
+                    "sock_id=" .. sock_id,
+                    "protocol=" .. protocol,
+                    "addr=" .. addr
+                )
                 local ok, err = websocket.accept(sock_id, handle, protocol, addr)
                 if not ok then
-                    print(err)
+                    skynet.error(err)
                 end
             end
         )
+
+        proto_map.registerFiles("./protos/service.pb")
+
+        -- skynet.register("ws_handle")
     end
 )

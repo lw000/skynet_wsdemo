@@ -8,8 +8,6 @@ require "skynet.manager"
 require("export")
 require("proto_map")
 
-proto_map.registerFiles("./protos/service.pb")
-
 local client = ws:new()
 
 local CMD = {}
@@ -123,6 +121,8 @@ function dispatcher()
         end
     )
     -- skynet.register("ws_client")
+
+    proto_map.registerFiles("./protos/service.pb")
 end
 
 skynet.start(dispatcher)
