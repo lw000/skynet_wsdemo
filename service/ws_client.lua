@@ -117,10 +117,12 @@ function dispatcher()
                 local f = CMD[cmd]
                 assert(f)
                 skynet.ret(skynet.pack(f(...)))
+            else
+                skynet.error(string.format("Unknown command %s", tostring(cmd)))
             end
         end
     )
-    skynet.register("ws_client")
+    -- skynet.register("ws_client")
 end
 
 skynet.start(dispatcher)

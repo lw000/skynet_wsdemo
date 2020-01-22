@@ -151,9 +151,9 @@ skynet.start(
     function()
         skynet.dispatch(
             "lua",
-            function(_, _, id, protocol, addr)
-                print("accept", "id=" .. id, "protocol=" .. protocol, "addr=" .. addr)
-                local ok, err = websocket.accept(id, handle, protocol, addr)
+            function(session, address, sock_id, protocol, addr)
+                print("accept", "session= " .. session, "address=".. skynet.address(address), "sock_id=" .. sock_id, "protocol=" .. protocol, "addr=" .. addr)
+                local ok, err = websocket.accept(sock_id, handle, protocol, addr)
                 if not ok then
                     print(err)
                 end

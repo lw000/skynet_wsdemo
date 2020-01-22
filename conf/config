@@ -8,7 +8,7 @@ bootstrap = "snlua bootstrap"
 harbor = 0
 
 -- main script
-start = "testws"
+start = "main"
 
 -- logger
 logger = nil

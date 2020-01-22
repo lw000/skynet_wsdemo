@@ -78,7 +78,7 @@ end
 function WSClient:registerService(mid, sid, serverId, content, fn)
     if not self._open then
         skynet.error("websocket is closed")
-        return 0
+        return 1
     end
     self._serverId = serverId
     self:send(mid, sid, content, fn)
@@ -87,7 +87,7 @@ end
 function WSClient:send(mid, sid, content, fn)
     if not self._open then
         skynet.error("websocket is closed")
-        return 0
+        return 1
     end
 
     if fn then
@@ -109,12 +109,12 @@ function WSClient:send(mid, sid, content, fn)
     pk:pack(mid, sid, self._wsid, content)
     if pk:data() == nil then
         skynet.error("data is nil")
-        return 0
+        return 1
     end
 
     self._websocket.write(self._wsid, pk:data(), "binary", 0x02)
 
-    return 1
+    return 0
 end
 
 function WSClient:open()
@@ -129,33 +129,28 @@ end
 function WSClient:handleMessage(fn)
     if not self._open then
         skynet.error("websocket is closed")
-        return 0
+        return 1
     end
     self._onMessage = fn or function(conn, pk)
             skynet.error("<: ", "mid=" .. pk:mid(), "sid=" .. pk:sid(), "clientId=" .. pk:clientId(), "默认·消息·函数")
         end
-    return 1
+    return 0
 end
 
 function WSClient:handleError(fn)
     if not self._open then
-        return 0
+        return 1
     end
     self._onError = fn or function(err)
             skynet.error(err, "默认·错误处理·函数")
         end
-    return 1
+    return 0
 end
 
 function WSClient:run()
-    if not self._open then
-        skynet.error("websocket is closed")
-        return 0
-    end
-
     skynet.error("websocket running")
 
-    while true do
+    while self._open do
         local resp, close_reason = self._websocket.read(self._wsid)
         skynet.error("<:", (resp and resp or "[Close] " .. close_reason))
         if not resp then
