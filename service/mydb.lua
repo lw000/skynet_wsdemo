@@ -1,13 +1,11 @@
 package.path = package.path .. ";./service/?.lua;"
-package.path = package.path .. ";./service/common/?.lua;"
-package.path = package.path .. ";./service/net/?.lua;"
 
-local skynet = require "skynet"
-local socket = require "skynet.socket"
-local service = require "skynet.service"
-local queue = require "skynet.queue"
-require "skynet.manager" -- import skynet.register
-require "export"
+local skynet = require("skynet")
+local socket = require("skynet.socket")
+local service = require("skynet.service")
+local queue = require("skynet.queue")
+require("skynet.manager") -- import skynet.register
+require("common.export")
 
 local cs = queue() --获取一个执行队列
 

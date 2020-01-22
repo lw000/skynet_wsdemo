@@ -1,11 +1,9 @@
 package.path = package.path .. ";./service/?.lua;"
-package.path = package.path .. ";./service/common/?.lua;"
-package.path = package.path .. ";./service/net/?.lua;"
 
-local skynet = require "skynet"
-local socket = require "skynet.socket"
-local service = require "skynet.service"
-require "skynet.manager"
+local skynet = require("skynet")
+local socket = require("skynet.socket")
+local service = require("skynet.service")
+require("skynet.manager")
 
 local ws_server_id = -1
 

@@ -1,4 +1,4 @@
-require("export")
+require("common.export")
 
 local Packet = class("Packet")
 

@@ -1,12 +1,10 @@
 package.path = package.path .. ";./service/?.lua;"
-package.path = package.path .. ";./service/common/?.lua;"
-package.path = package.path .. ";./service/net/?.lua;"
 
-local skynet = require "skynet"
-local service = require "skynet.service"
-local ws = require("ws")
+local skynet = require("skynet")
+local service = require("skynet.service")
+local ws = require("network.ws")
+require("common.export")
 
-require("export")
 -- require("proto_map")
 
 -- proto_map.registerFiles("./protos/service.pb")
@@ -97,7 +95,7 @@ require("export")
 -- end
 
 local mydb = -1
-function dump_cache( ... )
+function dump_cache(...)
     skynet.timeout(100, dump_cache)
     skynet.call(mydb, "lua", "dump")
 end

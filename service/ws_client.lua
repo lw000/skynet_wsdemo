@@ -1,11 +1,9 @@
 package.path = package.path .. ";./service/?.lua;"
-package.path = package.path .. ";./service/common/?.lua;"
-package.path = package.path .. ";./service/net/?.lua;"
 
-local skynet = require "skynet"
-local ws = require("ws")
-require "skynet.manager"
-require("export")
+local skynet = require("skynet")
+local ws = require("network.ws")
+require("skynet.manager")
+require("common.export")
 require("proto_map")
 
 local client = ws:new()
@@ -106,23 +104,27 @@ function CMD.registerService(serverId, svrType)
     )
 end
 
-function dispatcher()
-    skynet.dispatch(
-        "lua",
-        function(session, address, cmd, ...)
-            cmd = cmd:upper()
-            if cmd == "START" then
-                local f = CMD[cmd]
-                assert(f)
-                skynet.ret(skynet.pack(f(...)))
-            else
-                skynet.error(string.format("Unknown command %s", tostring(cmd)))
+skynet.init(
+    function()
+        skynet.error("init was success......")
+    end
+)
+
+skynet.start(
+    function()
+        skynet.dispatch(
+            "lua",
+            function(session, address, cmd, ...)
+                cmd = cmd:upper()
+                if cmd == "START" then
+                    local f = CMD[cmd]
+                    assert(f)
+                    skynet.ret(skynet.pack(f(...)))
+                else
+                    skynet.error(string.format("Unknown command %s", tostring(cmd)))
+                end
             end
-        end
-    )
-    -- skynet.register("ws_client")
-
-    proto_map.registerFiles("./protos/service.pb")
-end
-
-skynet.start(dispatcher)
+        )
+        proto_map.registerFiles("./protos/service.pb")
+    end
+)

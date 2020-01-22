@@ -1,9 +1,8 @@
 package.path = package.path .. ";./service/?.lua;"
-package.path = package.path .. ";./service/common/?.lua;"
-package.path = package.path .. ";./service/net/?.lua;"
-local skynet = require "skynet"
-local websocket = require "http.websocket"
-local packet = require("packet")
+
+local skynet = require("skynet")
+local websocket = require("http.websocket")
+local packet = require("network.packet")
 require("proto_map")
 
 local handle = {}
