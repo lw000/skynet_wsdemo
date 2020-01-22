@@ -22,14 +22,32 @@ function proto_map.encode_ReqRegService(t)
     return pb.encode("Tapi.ReqRegService", t)
 end
 
+function proto_map.decode_ReqRegService(data)
+    return pb.decode("Tapi.ReqRegService", data)
+end
+
+function proto_map.encode_AckRegService(t)
+    return pb.encode("Tapi.AckRegService", t)
+end
+
 function proto_map.decode_AckRegService(data)
     return pb.decode("Tapi.AckRegService", data)
 end
 
-function proto_map.decode_ReqServerConned(t)
-    return pb.decode("Tapi.ReqServerConned", t)
+function proto_map.encode_ReqServerConned(t)
+    return pb.encode("Tapi.ReqServerConned", t)
+end
+
+function proto_map.decode_ReqServerConned(data)
+    return pb.decode("Tapi.ReqServerConned", data)
+end
+
+function proto_map.encode_ReqServerClosed(t)
+    return pb.encode("Tapi.ReqServerClosed", t)
 end
 
 function proto_map.decode_ReqServerClosed(data)
     return pb.decode("Tapi.ReqServerClosed", data)
 end
+
+-- dump(proto_map, "proto_map")
