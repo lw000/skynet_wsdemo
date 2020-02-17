@@ -53,7 +53,7 @@ function WSClient:connect(scheme, host, path, heartbeattime)
             self._onError(err)
         end
     )
-    dump(ok, "connect")
+    -- dump(ok, "connect")
 
     if not ok then
         return 1, "ws connect fail"

@@ -23,40 +23,22 @@ local msgs_switch = {
         [0x0000] = {
             name = "心跳消息",
             fn = function(conn, pk)
-                print("心跳消息", os.date("%Y-%m-%d %H:%M:%S", os.time()))
+                skynet.error("心跳消息", os.date("%Y-%m-%d %H:%M:%S", os.time()))
             end
         }
     },
     [0x0001] = {
+        name = "MDM_CORE",
         [0x0001] = {
             name = "SUB_CORE_REGISTER",
             fn = function(conn, pk)
-                local data = proto_map.decode_AckRegService(pk:data())
+                local data = proto_map.decode_AckRegistService(pk:data())
                 if data.result == 0 then
-                    print(
+                    skynet.error(
                         "服务注册成功",
                         "result=" .. data.result .. ", serverId=" .. data.serverId .. ", errmsg=" .. data.errmsg
                     )
                 end
-            end
-        },
-        [0x0002] = {
-            name = "SUB_CORE_SVRCONNED",
-            fn = function(conn, pk)
-                local data = proto_map.decode_ReqServerConned(pk:data())
-                print(
-                    "服务器已连接",
-                    "serverId=" ..
-                        data.serverId ..
-                            ", svrType=" .. data.svrType .. ", host=" .. data.host .. ", port=" .. data.port
-                )
-            end
-        },
-        [0x0003] = {
-            name = "SUB_CORE_SVRCLOSED",
-            fn = function(conn, pk)
-                local data = proto_map.decode_ReqServerClosed(pk:data())
-                print("服务器已关闭", "serverId=" .. data.serverId .. ", svrType=" .. data.svrType)
             end
         }
     }
@@ -77,28 +59,22 @@ function command.START(scheme, host)
     return 0, "网络服务启动成功"
 end
 
-function command.registerService(svrType)
-    local reqRegService =
+function command.registerService(serverType)
+    local content =
         proto_map.encode_ReqRegService(
         {
             serverId = command.client:serverId(),
-            svrType = svrType
+            svrType = serverType
         }
     )
-    -- wsclient:registerService(0x0001, 0x0001, 0, content)
-
-    command.client:registerService(
-        0x0001,
-        0x0001,
-        reqRegService,
-        function(conn, pk)
-            local data = proto_map.decode_AckRegService(pk:data())
-            dump(data, "AckRegService")
-            if data.result == 0 then
-                print("服务注册成功", "result=" .. data.result, "serverId=" .. data.serverId, "errmsg=" .. data.errmsg)
-            end
+    local on_cb_regservice = function(conn, pk)
+        local data = proto_map.decode_AckRegService(pk:data())
+        dump(data, "AckRegistService")
+        if data.result == 0 then
+            print("code=" .. data.result, "serverId=" .. data.serverId, "errmsg=" .. data.errmsg)
         end
-    )
+    end
+    command.client:registerService(0x0001, 0x0001, content, on_cb_regservice)
 end
 
 function command.alive()
@@ -135,7 +111,7 @@ end
 
 skynet.init(
     function()
-        skynet.error("ws_client init success......")
+        skynet.error("ws_client init ......")
     end
 )
 

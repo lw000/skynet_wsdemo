@@ -1,7 +1,6 @@
 syntax = "proto2";
 
-package Tapi;
-
+package Tws;
 
 //请求注册服务
 message ReqRegService {

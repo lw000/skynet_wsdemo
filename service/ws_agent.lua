@@ -4,7 +4,9 @@ local websocket = require("http.websocket")
 local packet = require("network.packet")
 require("proto_map")
 
-local handle = {}
+local handle = {
+    debug = 0
+}
 
 local msgs_switch = {
     [0x0000] = {
@@ -24,12 +26,12 @@ local msgs_switch = {
         [0x0001] = {
             name = "SUB_CORE_REGISTER",
             dest = "注册服务",
-            req = proto_map.decode_ReqRegService,
-            ack = proto_map.encode_AckRegService,
+            req = proto_map.encode_ReqRegistService,
+            ack = proto_map.encode_AckRegistService,
             fn = function(sock_id, mid, sid, clientId, req)
-                dump(req, "ReqRegService")
+                dump(req, "ReqRegistService")
 
-                local ack =
+                local content =
                     proto_map.encode_AckRegService(
                     {
                         result = 0,
@@ -37,48 +39,54 @@ local msgs_switch = {
                         errmsg = "客户端注册成功"
                     }
                 )
-                handle.send(sock_id, mid, sid, clientId, ack)
+                handle.send(sock_id, mid, sid, clientId, content)
             end
         }
     }
 }
 
 function handle.connect(sock_id)
-    print("ws connect from: " .. tostring(sock_id))
+    -- print("ws connect from: " .. tostring(sock_id))
 end
 
 function handle.handshake(sock_id, header, url)
     local addr = websocket.addrinfo(sock_id)
-    print("ws handshake from: " .. tostring(sock_id), "url=" .. url, "addr=" .. addr)
-    print("----header-----")
-    for k, v in pairs(header) do
-        print(k, v)
-    end
-    print("--------------")
+    print("ws handshake from", "addr=" .. addr, "url=" .. url)
+    -- print("----header-----")
+    -- for k, v in pairs(header) do
+    --     print(k, v)
+    -- end
+    -- print("--------------")
 end
 
 function handle.message(sock_id, msg)
     local pk = packet:new()
     pk:unpack(msg)
 
-    -- skynet.error(
-    --     "<: agent",
-    --     "sock_id=" .. sock_id,
-    --     "mid=" .. pk:mid(),
-    --     "sid=" .. pk:sid(),
-    --     "checkCode=" .. pk:checkCode(),
-    --     "clientId=" .. pk:clientId(),
-    --     "dataLen=" .. string.len(pk:data())
-    -- )
+    if handle.debug == 1 then
+        skynet.error(
+            "<: agent",
+            "sock_id=" .. sock_id,
+            "mid=" .. pk:mid(),
+            "sid=" .. pk:sid(),
+            "checkCode=" .. pk:checkCode(),
+            "clientId=" .. pk:clientId(),
+            "dataLen=" .. string.len(pk:data())
+        )
+    end
 
     local msgmap = msgs_switch[pk:mid()][pk:sid()]
+    dump(msgmap, "msgmap")
     if msgmap then
         if msgmap.fn then
             local req = nil
-            if msgmap.req then
-                msgmap.req(pk:data())
+            if msgmap.req and pk:data() then
+                req = msgmap.req(pk:data())
             end
-            skynet.fork(msgmap.fn, sock_id, pk:mid(), pk:sid(), pk:clientId(), req)
+            local mid = pk:mid()
+            local sid = pk:sid()
+            local clientId = pk:clientId()
+            skynet.fork(msgmap.fn, sock_id, mid, sid, clientId, req)
         end
     else
         skynet.error("<: pk", "mid=" .. pk:mid() .. ", sid=" .. pk:sid() .. "命令未实现")
@@ -114,7 +122,7 @@ end
 
 skynet.init(
     function()
-        skynet.error("ws_agent init success......")
+        skynet.error("ws_agent init ......")
     end
 )
 

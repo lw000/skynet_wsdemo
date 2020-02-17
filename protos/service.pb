@@ -1,6 +1,6 @@
 
-ú
-service.protoTapi"…
+ù
+service.protoTws"…
 ReqRegService
 serverId (RserverId
 svrType (RsvrType
