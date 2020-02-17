@@ -7,7 +7,13 @@ require("skynet.manager")
 require("common.export")
 require("proto_map")
 
+local SVR_TYPE = {
+    ServerType = 6
+}
+
 local command = {
+    scheme = "",
+    host = 0,
     running = false,
     client = ws:new()
 }
@@ -57,16 +63,18 @@ local msgs_switch = {
 }
 
 function command.START(scheme, host)
+    command.scheme = scheme
+    command.host = host
     command.client:handleMessage(command.onMessage)
     command.client:handleError(command.onError)
     local ok, err = command.client:connect(scheme, host)
     if err then
         return 1, "网络服务启动失败"
     end
-    command.registerService(6)
+    command.registerService(SVR_TYPE.ServerType)
     command.running = true
     command.alive()
-    return 0, "网络服务启动成功" 
+    return 0, "网络服务启动成功"
 end
 
 function command.registerService(svrType)
@@ -100,11 +108,7 @@ function command.alive()
                 local checking = command.client:open()
                 if not checking then
                     skynet.error("断线重连")
-                    command.client:connect(
-                        "ws",
-                        string.format("%s:%d", command.sysconf["ws"].ip, command.sysconf["ws"].port),
-                        ""
-                    )
+                    command.client:connect(command.scheme, command.host)
                     command.registerService(SVR_TYPE.ServerType)
                 end
                 skynet.sleep(100 * 3)
@@ -150,7 +154,6 @@ local function dispatch()
         end
     )
     skynet.register(".ws_client")
-    proto_map.registerFiles("./protos/service.pb")
 end
 
 skynet.start(dispatch)
