@@ -9,9 +9,9 @@ local ws_server_id = -1
 
 local agents = {}
 
-local CMD = {}
+local command = {}
 
-function CMD.START(port)
+function command.START(port)
     local protocol = "ws"
     ws_server_id = socket.listen("0.0.0.0", port)
     assert(ws_server_id ~= -1, "listten fail")
@@ -23,16 +23,16 @@ function CMD.START(port)
         function(id, addr)
             print(string.format("accept client socket_id: %s addr:%s", id, addr))
 
-            local handle_server_id = skynet.newservice("ws_handle")
-            agents[handle_server_id] = handle_server_id
-            skynet.send(handle_server_id, "lua", id, protocol, addr)
+            local handle_id = skynet.newservice("ws_agent")
+            agents[handle_id] = handle_id
+            skynet.send(handle_id, "lua", id, protocol, addr)
         end
     )
     
     return 0, "websocket server start success"
 end
 
-function CMD.STOP()
+function command.STOP()
     socket.close(ws_server_id)
     skynet.error("websocket exit")
 end
@@ -44,7 +44,7 @@ skynet.start(
             function(session, address, cmd, ...)
                 cmd = cmd:upper()
                 if cmd == "START" then
-                    local f = CMD[cmd]
+                    local f = command[cmd]
                     assert(f)
                     skynet.ret(skynet.pack(f(...)))
                 else
@@ -52,6 +52,6 @@ skynet.start(
                 end
             end
         )
-        skynet.register("ws_server")
+        skynet.register(".ws_server")
     end
 )

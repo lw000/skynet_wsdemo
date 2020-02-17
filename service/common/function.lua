@@ -49,9 +49,9 @@ end
 function before_yesterday(now)
     local t = os.date("*t", now)
     t.day = t.day - 2
-    t.hour = 0
-    t.min = 0
-    t.sec = 0
+    -- t.hour = 0
+    -- t.min = 0
+    -- t.sec = 0
     return os.time(t)
 end
 
@@ -59,10 +59,75 @@ end
 function tomorrow(now)
     local t = os.date("*t", now)
     t.day = t.day + 1
-    t.hour = 0
-    t.min = 0
-    t.sec = 0
+    -- t.hour = 0
+    -- t.min = 0
+    -- t.sec = 0
     return os.time(t)
+end
+
+-- 字符串转时间格式
+function string2time(timeString)
+    if type(timeString) ~= "string" then
+        error("string2time: timeString is not a string")
+        return 0
+    end
+    local fun = string.gmatch(timeString, "%d+")
+    local y = fun() or 0
+    if y == 0 then
+        error("timeString is a invalid time string")
+        return 0
+    end
+    local m = fun() or 0
+    if m == 0 then
+        error("timeString is a invalid time string")
+        return 0
+    end
+    local d = fun() or 0
+    if d == 0 then
+        error("timeString is a invalid time string")
+        return 0
+    end
+    local H = fun() or 0
+    if H == 0 then
+        error("timeString is a invalid time string")
+        return 0
+    end
+    local M = fun() or 0
+    if M == 0 then
+        error("timeString is a invalid time string")
+        return 0
+    end
+    local S = fun() or 0
+    if S == 0 then
+        error("timeString is a invalid time string")
+        return 0
+    end
+    return os.time({year = y, month = m, day = d, hour = H, min = M, sec = S})
+end
+
+-- 字符串转日期格式
+function string2date(timeString)
+    if type(timeString) ~= "string" then
+        error("string2date: timeString is not a string")
+        return 0
+    end
+    local fun = string.gmatch(timeString, "%d+")
+    local y = fun() or 0
+    if y == 0 then
+        error("string2date is a invalid date string")
+        return 0
+    end
+    local m = fun() or 0
+    if m == 0 then
+        error("string2date is a invalid date string")
+        return 0
+    end
+    local d = fun() or 0
+    if d == 0 then
+        error("string2date is a invalid date string")
+        return 0
+    end
+    return os.time({year = y, month = m, day = d, hour = 23, min = 59, sec = 59})
 end
 
 function checknumber(value, base)
@@ -78,7 +143,9 @@ function checkbool(value)
 end
 
 function checktable(value)
-    if type(value) ~= "table" then value = {} end
+    if type(value) ~= "table" then
+        value = {}
+    end
     return value
 end
 
@@ -115,7 +182,9 @@ function io.writefile(path, content, mode)
     mode = mode or "w+b"
     local file = io.open(path, mode)
     if file then
-        if file:write(content) == nil then return false end
+        if file:write(content) == nil then
+            return false
+        end
         io.close(file)
         return true
     else
@@ -161,7 +230,6 @@ function io.filesize(path)
     return size
 end
 
-
 function table.nums(t)
     local count = 0
     for k, v in pairs(t) do
@@ -206,14 +274,18 @@ end
 
 function table.indexof(array, value, begin)
     for i = begin or 1, #array do
-        if array[i] == value then return i end
+        if array[i] == value then
+            return i
+        end
     end
     return false
 end
 
 function table.keyof(hashtable, value)
     for k, v in pairs(hashtable) do
-        if v == value then return k end
+        if v == value then
+            return k
+        end
     end
     return nil
 end
@@ -226,7 +298,9 @@ function table.removebyvalue(array, value, removeall)
             c = c + 1
             i = i - 1
             max = max - 1
-            if not removeall then break end
+            if not removeall then
+                break
+            end
         end
         i = i + 1
     end
@@ -240,14 +314,16 @@ function table.map(t, fn)
 end
 
 function table.walk(t, fn)
-    for k,v in pairs(t) do
+    for k, v in pairs(t) do
         fn(v, k)
     end
 end
 
 function table.filter(t, fn)
     for k, v in pairs(t) do
-        if not fn(v, k) then t[k] = nil end
+        if not fn(v, k) then
+            t[k] = nil
+        end
     end
 end
 
@@ -268,7 +344,6 @@ function table.unique(t, bArray)
     end
     return n
 end
-
 
 function string.htmlspecialchars(input)
     for k, v in pairs(string._htmlspecialchars_set) do
@@ -299,10 +374,14 @@ end
 function string.split(input, delimiter)
     input = tostring(input)
     delimiter = tostring(delimiter)
-    if (delimiter=='') then return false end
-    local pos,arr = 0, {}
+    if (delimiter == "") then
+        return false
+    end
+    local pos, arr = 0, {}
     -- for each divider found
-    for st,sp in function() return string.find(input, delimiter, pos, true) end do
+    for st, sp in function()
+        return string.find(input, delimiter, pos, true)
+    end do
         table.insert(arr, string.sub(input, pos, st - 1))
         pos = sp + 1
     end
@@ -340,20 +419,27 @@ function string.urlencode(input)
 end
 
 function string.urldecode(input)
-    input = string.gsub (input, "+", " ")
-    input = string.gsub (input, "%%(%x%x)", function(h) return string.char(checknumber(h,16)) end)
-    input = string.gsub (input, "\r\n", "\n")
+    input = string.gsub(input, "+", " ")
+    input =
+        string.gsub(
+        input,
+        "%%(%x%x)",
+        function(h)
+            return string.char(checknumber(h, 16))
+        end
+    )
+    input = string.gsub(input, "\r\n", "\n")
     return input
 end
 
 function string.utf8len(input)
-    local len  = string.len(input)
+    local len = string.len(input)
     local left = len
-    local cnt  = 0
-    local arr  = {0, 0xc0, 0xe0, 0xf0, 0xf8, 0xfc}
+    local cnt = 0
+    local arr = {0, 0xc0, 0xe0, 0xf0, 0xf8, 0xfc}
     while left ~= 0 do
         local tmp = string.byte(input, -left)
-        local i   = #arr
+        local i = #arr
         while arr[i] do
             if tmp >= arr[i] then
                 left = left - i
@@ -370,8 +456,10 @@ function string.formatnumberthousands(num)
     local formatted = tostring(checknumber(num))
     local k
     while true do
-        formatted, k = string.gsub(formatted, "^(-?%d+)(%d%d%d)", '%1,%2')
-        if k == 0 then break end
+        formatted, k = string.gsub(formatted, "^(-?%d+)(%d%d%d)", "%1,%2")
+        if k == 0 then
+            break
+        end
     end
     return formatted
 end

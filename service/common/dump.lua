@@ -1,3 +1,5 @@
+local skynet = require("skynet")
+
 local function dump_value_(v)
     if type(v) == "string" then
         v = '"' .. v .. '"'
@@ -15,6 +17,7 @@ function dump(value, description, nesting)
 
     local traceback = string.split(debug.traceback("", 2), "\n")
     print("dump from: " .. string.trim(traceback[3]))
+    -- skynet.error("dump from: " .. string.trim(traceback[3]))
 
     local function dump_(value, description, indent, nest, keylen)
         description = description or "<var>"
@@ -67,5 +70,6 @@ function dump(value, description, nesting)
 
     for i, line in ipairs(result) do
         print(line)
+        -- skynet.error(line)
     end
 end

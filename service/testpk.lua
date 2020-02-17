@@ -1,8 +1,8 @@
-local packet = require("packet")
 local pb = require("protobuf")
+local packet = require("network.packet")
 
 pb.register_file("./protos/service.pb")
-print("注册service协议")
+print("注册[service.pb]协议")
 
 function packTest()
     local content =

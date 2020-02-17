@@ -1,14 +1,16 @@
 package.path = package.path .. ";./service/?.lua;"
 
 local skynet = require("skynet")
+local service = require("skynet.service")
 local ws = require("network.ws")
 require("skynet.manager")
 require("common.export")
 require("proto_map")
 
-local client = ws:new()
-
-local CMD = {}
+local command = {
+    running = false,
+    client = ws:new()
+}
 
 local msgs_switch = {
     [0x0000] = {
@@ -54,45 +56,32 @@ local msgs_switch = {
     }
 }
 
-function CMD.START(scheme, host)
-    client:connect(scheme, host)
-    client:handleMessage(
-        function(conn, pk)
-            local msgmap = msgs_switch[pk:mid()][pk:sid()]
-            if msgmap then
-                if msgmap.fn ~= nil then
-                    skynet.fork(msgmap.fn, self, pk)
-                -- msgmap.fn(self, pk)
-                end
-            else
-                print("<: pk", "mid=" .. pk:mid() .. ", sid=" .. pk:sid() .. "命令未实现")
-            end
-        end
-    )
-
-    client:handleError(
-        function(...)
-            -- body
-        end
-    )
-
-    CMD.registerService(0, 6)
+function command.START(scheme, host)
+    command.client:handleMessage(command.onMessage)
+    command.client:handleError(command.onError)
+    local ok, err = command.client:connect(scheme, host)
+    if err then
+        return 1, "网络服务启动失败"
+    end
+    command.registerService(6)
+    command.running = true
+    command.alive()
+    return 0, "网络服务启动成功" 
 end
 
-function CMD.registerService(serverId, svrType)
+function command.registerService(svrType)
     local reqRegService =
         proto_map.encode_ReqRegService(
         {
-            serverId = serverId,
+            serverId = command.client:serverId(),
             svrType = svrType
         }
     )
     -- wsclient:registerService(0x0001, 0x0001, 0, content)
 
-    client:registerService(
+    command.client:registerService(
         0x0001,
         0x0001,
-        0,
         reqRegService,
         function(conn, pk)
             local data = proto_map.decode_AckRegService(pk:data())
@@ -104,27 +93,64 @@ function CMD.registerService(serverId, svrType)
     )
 end
 
+function command.alive()
+    skynet.fork(
+        function()
+            while command.running do
+                local checking = command.client:open()
+                if not checking then
+                    skynet.error("断线重连")
+                    command.client:connect(
+                        "ws",
+                        string.format("%s:%d", command.sysconf["ws"].ip, command.sysconf["ws"].port),
+                        ""
+                    )
+                    command.registerService(SVR_TYPE.ServerType)
+                end
+                skynet.sleep(100 * 3)
+            end
+        end
+    )
+end
+
+function command.onMessage(conn, pk)
+    local msgmap = msgs_switch[pk:mid()][pk:sid()]
+    if msgmap then
+        if msgmap.fn ~= nil then
+            skynet.fork(msgmap.fn, self, pk)
+        -- msgmap.fn(self, pk)
+        end
+    else
+        print("<: pk", "mid=" .. pk:mid() .. ", sid=" .. pk:sid() .. "命令未实现")
+    end
+end
+
+function command.onError(err)
+    skynet.error(err)
+end
+
 skynet.init(
     function()
-        skynet.error("init was success......")
+        skynet.error("ws_client init success......")
     end
 )
 
-skynet.start(
-    function()
-        skynet.dispatch(
-            "lua",
-            function(session, address, cmd, ...)
-                cmd = cmd:upper()
-                if cmd == "START" then
-                    local f = CMD[cmd]
-                    assert(f)
-                    skynet.ret(skynet.pack(f(...)))
-                else
-                    skynet.error(string.format("Unknown command %s", tostring(cmd)))
-                end
+local function dispatch()
+    skynet.dispatch(
+        "lua",
+        function(session, address, cmd, ...)
+            cmd = cmd:upper()
+            if cmd == "START" then
+                local f = command[cmd]
+                assert(f)
+                skynet.ret(skynet.pack(f(...)))
+            else
+                skynet.error(string.format("unknown command %s", tostring(cmd)))
             end
-        )
-        proto_map.registerFiles("./protos/service.pb")
-    end
-)
+        end
+    )
+    skynet.register(".ws_client")
+    proto_map.registerFiles("./protos/service.pb")
+end
+
+skynet.start(dispatch)

@@ -11,7 +11,7 @@ harbor = 0
 start = "main"
 
 -- logger
-logger = nil
+--logger = "./log/skynet.log"
 logservice = "logger"
 logpath = "."
  

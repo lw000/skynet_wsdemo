@@ -7,7 +7,7 @@ local queue = require("skynet.queue")
 require("skynet.manager") -- import skynet.register
 require("common.export")
 
-local cs = queue() --获取一个执行队列
+local task_queue = queue() --获取一个执行队列
 
 local cache = {
     version = "1.0.0",
@@ -49,7 +49,7 @@ skynet.start(
                 if cmd == "SET" then
                     local f = CMD[cmd]
                     assert(f)
-                    skynet.ret(skynet.pack(cs(f, ...)))
+                    skynet.ret(skynet.pack(task_queue(f, ...)))
                 else
                     local f = CMD[cmd]
                     assert(f)
@@ -61,6 +61,6 @@ skynet.start(
                 end
             end
         )
-        skynet.register("mydb")
+        skynet.register(".mydb")
     end
 )

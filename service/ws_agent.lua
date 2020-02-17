@@ -20,10 +20,10 @@ local msgs_switch = {
     [0x0001] = {
         [0x0001] = {
             name = "SUB_CORE_REGISTER",
-            dest = "心跳",
+            dest = "注册服务",
             fn = function(id, pk)
                 local reqRegService = proto_map.decode_ReqRegService(pk:data())
-                dump(reqRegService, "service recv, ReqRegService")
+                dump(reqRegService, "ReqRegService")
 
                 local ackRegService =
                     proto_map.encode_AckRegService(
@@ -34,66 +34,43 @@ local msgs_switch = {
                     }
                 )
                 handle.send(id, pk:mid(), pk:sid(), pk:clientId(), ackRegService)
-
-                local reqServerConned =
-                    proto_map.encode_ReqServerConned(
-                    {
-                        serverId = 1, -- 服务器ID
-                        svrType = 2, -- 服务器类型
-                        host = "192.168.0.105", -- 服务器地址
-                        port = 9090 -- 服务器类型
-                    }
-                )
-                handle.send(id, pk:mid(), 0x0002, pk:clientId(), reqServerConned)
-            end
-        },
-        [0x0002] = {
-            name = "SUB_CORE_SVRCONNED",
-            dest = "服务连接",
-            fn = function(id, pk)
-            end
-        },
-        [0x0003] = {
-            name = "SUB_CORE_SVRCLOSED",
-            dest = "服务断开",
-            fn = function(id, pk)
             end
         }
     }
 }
 
 function handle.connect(id)
-    skynet.error("ws connect from: " .. tostring(id))
+    print("ws connect from: " .. tostring(id))
 end
 
 function handle.handshake(id, header, url)
     local addr = websocket.addrinfo(id)
-    skynet.error("ws handshake from: " .. tostring(id), "url=" .. url, "addr=" .. addr)
-    skynet.error("----header-----")
+    print("ws handshake from: " .. tostring(id), "url=" .. url, "addr=" .. addr)
+    print("----header-----")
     for k, v in pairs(header) do
-        skynet.error(k, v)
+        print(k, v)
     end
-    skynet.error("--------------")
+    print("--------------")
 end
 
 function handle.message(id, msg)
     local pk = packet:new()
     pk:unpack(msg)
 
-    skynet.error(
-        "<: handle",
-        "id=" .. id,
-        "ver=" .. pk:ver(),
-        "mid=" .. pk:mid(),
-        "sid=" .. pk:sid(),
-        "checkCode=" .. pk:checkCode(),
-        "clientId=" .. pk:clientId(),
-        "dataLen=" .. string.len(pk:data())
-    )
+    -- skynet.error(
+    --     "<: handle",
+    --     "id=" .. id,
+    --     "ver=" .. pk:ver(),
+    --     "mid=" .. pk:mid(),
+    --     "sid=" .. pk:sid(),
+    --     "checkCode=" .. pk:checkCode(),
+    --     "clientId=" .. pk:clientId(),
+    --     "dataLen=" .. string.len(pk:data())
+    -- )
 
     local msgmap = msgs_switch[pk:mid()][pk:sid()]
     if msgmap then
-        if msgmap.fn ~= nil then
+        if msgmap.fn then
             skynet.fork(msgmap.fn, id, pk)
         end
     else
@@ -128,6 +105,12 @@ function handle.send(wsid, mid, sid, clientid, content)
     return 1, nil
 end
 
+skynet.init(
+    function()
+        skynet.error("ws_agent init success......")
+    end
+)
+
 skynet.start(
     function()
         skynet.dispatch(
@@ -147,9 +130,6 @@ skynet.start(
                 end
             end
         )
-
         proto_map.registerFiles("./protos/service.pb")
-
-        -- skynet.register("ws_handle")
     end
 )
