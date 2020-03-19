@@ -2,9 +2,9 @@
 skyent websocket 测试
 
 # 概要
-    1. main.lua 程序入口
-    2. ws_server websocket服务
-    3. ws_client 模拟客户端
+    1. main.lua     程序入口
+    2. ws_server    服务端
+    3. ws_client    客户端
     
 # 启动
     1. 单节点启动
@@ -17,7 +17,7 @@ skyent websocket 测试
         客户端启动
             cd skynet_wsdemo
             bin/skynet conf/config_client
-                 
+
 # 代码结构
 #### .
 #### ├── common
