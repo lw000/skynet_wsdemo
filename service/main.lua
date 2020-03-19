@@ -5,7 +5,6 @@ require("common.export")
 
 skynet.start(
     function()
-
         skynet.newservice("debug_console", conf.debugPort)
         -- local pack_little = string.pack("<I2", 259)
         -- local pack_bigger = string.pack(">I2", 259)
@@ -17,7 +16,7 @@ skynet.start(
         -- )
 
         local ws_server_id = skynet.newservice("ws_server")
-        local ret, err = skynet.call(ws_server_id, "lua", "start", 9948)
+        local ret, err = skynet.call(ws_server_id, "lua", "start", conf.listenPort)
         if ret ~= 0 then
             skynet.error(ret, err)
         end
