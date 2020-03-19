@@ -1,5 +1,6 @@
 local config = {
-    debug = 1
+    debug = 1,
+    debugPort = 8000,
 }
 
 

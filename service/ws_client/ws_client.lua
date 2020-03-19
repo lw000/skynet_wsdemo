@@ -1,11 +1,12 @@
 package.path = package.path .. ";./service/?.lua;"
+package.path = package.path .. ";./service/ws_client/?.lua;"
 
 local skynet = require("skynet")
 local service = require("skynet.service")
 local ws = require("network.ws")
 require("skynet.manager")
 require("common.export")
-require("proto_map")
+require("proto_map.proto_map")
 
 local SVR_TYPE = {
     ServerType = 6

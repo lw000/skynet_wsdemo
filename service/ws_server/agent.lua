@@ -2,7 +2,8 @@ package.path = package.path .. ";./service/?.lua;"
 local skynet = require("skynet")
 local websocket = require("http.websocket")
 local packet = require("network.packet")
-require("proto_map")
+require("skynet.manager")
+require("proto_map.proto_map")
 
 local handle = {
     debug = 0
@@ -144,6 +145,7 @@ local function dispatch()
             end
         end
     )
+    skynet.register(".agent")
 end
 
 skynet.start(dispatch)

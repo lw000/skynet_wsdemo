@@ -37,7 +37,7 @@ function Packet:unpack(data)
 
     data = data:sub(3)
     self._sid = string.unpack("<I2", data)
-   
+
     data = data:sub(3)
     self._clientId = string.unpack("<I4", data)
     
