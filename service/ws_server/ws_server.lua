@@ -8,6 +8,7 @@ require("skynet.manager")
 local command = {
     socketid = -1,
     port = 8080,
+    protocol = "ws",
     agents = {}
 }
 
@@ -25,17 +26,16 @@ function command.STOP()
 end
 
 function command.run()
-    local protocol = "ws"
     command.socketid = socket.listen("0.0.0.0", command.port)
     assert(command.socketid ~= -1, "listten fail")
 
-    skynet.error(string.format("Listen websocket port: " .. command.port .. " protocol:%s", protocol))
+    skynet.error(string.format("listen websocket port: " .. command.port .. " protocol:%s", command.protocol))
 
     socket.start(command.socketid, function(id, addr)
             skynet.error(string.format("accept client socket_id: %s addr:%s", id, addr))
             local agent_id = skynet.newservice("agent")
             command.agents[agent_id] = agent_id
-            skynet.send(agent_id, "lua", id, protocol, addr)
+            skynet.send(agent_id, "lua", id, command.protocol, addr)
         end
     )
 end
@@ -54,7 +54,7 @@ local function dispatch()
                 end
             end
         )
-        skynet.register(".ws_server")
+    skynet.register("ws_server")
 end
 
 skynet.start(dispatch)

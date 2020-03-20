@@ -6,7 +6,7 @@ require("skynet.manager")
 require("proto_map.proto_map")
 
 local handle = {
-    debug = 0
+    debug = false
 }
 
 local msgs_switch = {
@@ -31,9 +31,7 @@ local msgs_switch = {
             ack = proto_map.encode_AckRegistService,
             fn = function(sock_id, mid, sid, clientId, req)
                 dump(req, "ReqRegistService")
-
-                local content =
-                    proto_map.encode_AckRegService(
+                local content = proto_map.encode_AckRegService(
                     {
                         result = 0,
                         serverId = 10000,
@@ -64,7 +62,7 @@ function handle.message(sock_id, msg)
     local pk = packet:new()
     pk:unpack(msg)
 
-    if handle.debug == 1 then
+    if handle.debug then
         skynet.error(
             "<: agent",
             "sock_id=" .. sock_id,
@@ -75,22 +73,21 @@ function handle.message(sock_id, msg)
             "dataLen=" .. string.len(pk:data())
         )
     end
-
-    local msgmap = msgs_switch[pk:mid()][pk:sid()]
-    dump(msgmap, "msgmap")
+    
+    local mid = pk:mid()
+    local sid = pk:sid()
+    local clientId = pk:clientId()
+    local msgmap = msgs_switch[mid][sid]
     if msgmap then
         if msgmap.fn then
             local req = nil
             if msgmap.req and pk:data() then
                 req = msgmap.req(pk:data())
             end
-            local mid = pk:mid()
-            local sid = pk:sid()
-            local clientId = pk:clientId()
             skynet.fork(msgmap.fn, sock_id, mid, sid, clientId, req)
         end
     else
-        skynet.error("<: pk", "mid=" .. pk:mid() .. ", sid=" .. pk:sid() .. "命令未实现")
+        skynet.error("<: mid=" .. mid .. ", sid=" .. sid .. " 命令未实现")
     end
 end
 
@@ -115,10 +112,10 @@ function handle.send(wsid, mid, sid, clientid, content)
     pk:pack(mid, sid, clientid, content)
     if pk:data() == nil then
         skynet.error("packet create error")
-        return 0, "packet create error"
+        return 1, "packet create error"
     end
     websocket.write(wsid, pk:data(), "binary", 0x02)
-    return 1, nil
+    return 0
 end
 
 skynet.init(
@@ -139,8 +136,9 @@ local function dispatch()
                 "protocol=" .. protocol,
                 "addr=" .. addr
             )
+            
             local ok, err = websocket.accept(sock_id, handle, protocol, addr)
-            if not ok then
+            if err then
                 skynet.error(err)
             end
         end

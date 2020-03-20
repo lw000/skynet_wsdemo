@@ -54,10 +54,10 @@ function command.START(scheme, host)
     if err then
         return 1, "网络服务启动失败"
     end
-    command.registerService(SVR_TYPE.ServerType)
     command.running = true
+    command.registerService(SVR_TYPE.ServerType)
     command.alive()
-    return 0, "网络服务启动成功"
+    return 0
 end
 
 function command.registerService(serverType)
@@ -68,6 +68,7 @@ function command.registerService(serverType)
             svrType = serverType
         }
     )
+
     local on_cb_regservice = function(conn, pk)
         local data = proto_map.decode_AckRegService(pk:data())
         dump(data, "AckRegistService")
@@ -84,7 +85,7 @@ function command.alive()
             while command.running do
                 local checking = command.client:open()
                 if not checking then
-                    skynet.error("断线重连")
+                    skynet.error("reconnect to server")
                     command.client:connect(command.scheme, command.host)
                     command.registerService(SVR_TYPE.ServerType)
                 end
@@ -121,9 +122,9 @@ local function dispatch()
         "lua",
         function(session, address, cmd, ...)
             cmd = cmd:upper()
-            if cmd == "START" then
-                local f = command[cmd]
-                assert(f)
+            local f = command[cmd]
+            assert(f)
+            if f then
                 skynet.ret(skynet.pack(f(...)))
             else
                 skynet.error(string.format("unknown command %s", tostring(cmd)))

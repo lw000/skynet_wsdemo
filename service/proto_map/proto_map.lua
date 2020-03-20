@@ -11,7 +11,7 @@ function proto_map.registerFiles(...)
     local args = {...}
     for i = 1, #args do
         pb.register_file(args[i])
-        skynet.error("注册protobuf协议 " .. i .. " [" .. args[i] .. "]")
+        skynet.error("register protobuf [" .. args[i] .. "]")
     end
 end
 
